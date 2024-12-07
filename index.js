@@ -31,6 +31,7 @@ async function run() {
 
         const projectsCollection = client.db("portfolio").collection("projects");
         const skillsCollection = client.db("portfolio").collection("skills");
+        const aboutCollection = client.db("portfolio").collection("about");
 
         // Add project
         app.post('/projects', async (req, res) => {
@@ -60,7 +61,7 @@ async function run() {
             res.send(result)
         })
 
-        // Delete a project
+        // Update a project
         app.patch('/projects/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
@@ -74,6 +75,7 @@ async function run() {
                     technologies: update.technologies,
                     websiteLink: update.websiteLink,
                     features: update.features,
+                    completionDate: update.completionDate,
                 },
             };
             const result = await projectsCollection.updateOne(query, updateDoc)
@@ -87,6 +89,34 @@ async function run() {
             console.log(skill);
             const result = await skillsCollection.insertOne(skill)
             res.send(result)
+        })
+
+        app.get('/about-me', async (req, res) => {
+            const result = await aboutCollection.findOne({ _id: new ObjectId("664da373a402cecf4ecde2df") })
+            res.send(result)
+        })
+
+        app.patch('/about-me/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = {
+                _id: new ObjectId(id)
+            }
+            const about = req.body;
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    name: about?.name,
+                    email: about?.email,
+                    phone: about?.phone,
+                    city: about?.city,
+                    degree: about?.degree,
+                    description: about?.description,
+                    image: about?.image,
+                },
+            };
+            const result = await aboutCollection.updateOne(filter, updateDoc, options)
+            res.send(result)
+
         })
 
 
